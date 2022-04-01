@@ -1,6 +1,7 @@
 package com.xtransformers.spring.bean;
 
 import java.util.Collection;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,15 @@ public class BeanfactoryTest {
 
         // 解析 @Configuration @Bean
         // 给 BeanFactory 添加一些常用的后处理器
+        // 工具类调用注册方法时，会设置默认的比较器
         AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
+        // CommonAnnotationBeanPostProcessor
+        // setOrder(Ordered.LOWEST_PRECEDENCE - 3);
+        // AutowiredAnnotationBeanPostProcessor
+        // private int order = Ordered.LOWEST_PRECEDENCE - 2;
+        // 通过 Ordered 接口定义方法 int getOrder() 来排序的，Order 数字越小，优先级越高
+        // CommonAnnotationBeanPostProcessor 优先级高于 AutowiredAnnotationBeanPostProcessor
+
         /*
         org.springframework.context.annotation.internalConfigurationAnnotationProcessor
         org.springframework.context.annotation.internalAutowiredAnnotationProcessor
@@ -55,8 +64,15 @@ public class BeanfactoryTest {
 
         Collection<BeanPostProcessor> beanPostProcessors = beanFactory.getBeansOfType(BeanPostProcessor.class).values();
         // 以下两种写法都是可以的
-        // beanPostProcessors.forEach(beanFactory::addBeanPostProcessor);
-        beanFactory.addBeanPostProcessors(beanPostProcessors);
+        // 增加比较器之后，CommonAnnotationBeanPostProcessor 在 AutowiredAnnotationBeanPostProcessor 之前，所以结果是 Bean4
+        beanPostProcessors.stream()
+                .sorted(beanFactory.getDependencyComparator())
+                .forEach(beanPostProcessor -> {
+                    // 把 Bean 后处理器加入顺序打印出来
+                    LOGGER.info("beanPostProcessor >>>>>>>>>>> " + beanPostProcessor);
+                    beanFactory.addBeanPostProcessor(beanPostProcessor);
+                });
+        // beanFactory.addBeanPostProcessors(beanPostProcessors);
 
         // 默认情况下，懒汉式加载Bean 对象
         // 可以显示使用 饿汉式加载 Bean 对象
@@ -64,6 +80,7 @@ public class BeanfactoryTest {
         LOGGER.info("breakline >>>>>>>>>>>>");
 
         LOGGER.info("" + beanFactory.getBean(Bean1.class).getBean2());
+        LOGGER.info("" + beanFactory.getBean(Bean1.class).getInter());
         /**
          * BeanFactory 不会做
          * 1. 不会主动调用 BeanFactory 后处理器
@@ -88,6 +105,16 @@ public class BeanfactoryTest {
         public Bean2 bean2() {
             return new Bean2();
         }
+
+        @Bean
+        public Bean3 bean3() {
+            return new Bean3();
+        }
+
+        @Bean
+        public Bean4 bean4() {
+            return new Bean4();
+        }
     }
 
     static class Bean1 {
@@ -103,6 +130,18 @@ public class BeanfactoryTest {
         public Bean2 getBean2() {
             return bean2;
         }
+
+        /**
+         * 两个注解都有的情况下，而且还有冲突时，以 Bean 后处理器加入顺序决定
+         * 默认情况下是 Bean3
+         */
+        @Autowired
+        @Resource(name = "bean4")
+        private Inter bean3;
+
+        public Inter getInter() {
+            return bean3;
+        }
     }
 
     static class Bean2 {
@@ -110,6 +149,26 @@ public class BeanfactoryTest {
 
         public Bean2() {
             LOGGER.debug("bean2 constructor");
+        }
+    }
+
+    interface Inter {
+
+    }
+
+    static class Bean3 implements Inter {
+        private static final Logger LOGGER = LoggerFactory.getLogger(Bean3.class);
+
+        public Bean3() {
+            LOGGER.debug("bean3 constructor");
+        }
+    }
+
+    static class Bean4 implements Inter {
+        private static final Logger LOGGER = LoggerFactory.getLogger(Bean4.class);
+
+        public Bean4() {
+            LOGGER.debug("bean4 constructor");
         }
     }
 }
