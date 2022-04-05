@@ -1,4 +1,4 @@
-package com.xtransformers.spring.bean;
+package com.xtransformers.spring.a02;
 
 import java.util.Collection;
 import javax.annotation.Resource;

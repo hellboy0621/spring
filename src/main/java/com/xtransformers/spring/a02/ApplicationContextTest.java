@@ -1,4 +1,4 @@
-package com.xtransformers.spring.bean;
+package com.xtransformers.spring.a02;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
