@@ -29,7 +29,10 @@ public class A05Application {
 
         // springNative(context);
 
-        manual(context);
+        // manual(context);
+
+        // 使用自定义BeanFactory后处理器
+        context.registerBean(ComponentScanPostProcessor.class);
 
         // 初始化容器
         context.refresh();
