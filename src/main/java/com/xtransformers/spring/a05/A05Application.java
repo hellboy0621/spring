@@ -1,17 +1,21 @@
 package com.xtransformers.spring.a05;
 
 import java.io.IOException;
+import java.util.Set;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.stereotype.Component;
@@ -32,7 +36,35 @@ public class A05Application {
         // manual(context);
 
         // 使用自定义BeanFactory后处理器
-        context.registerBean(ComponentScanPostProcessor.class);
+        // context.registerBean(ComponentScanPostProcessor.class);
+
+        // 读取 Config 类的元数据信息
+        CachingMetadataReaderFactory factory = new CachingMetadataReaderFactory();
+        MetadataReader metadataReader =
+                factory.getMetadataReader(new ClassPathResource("com/xtransformers/spring/a05/Config.class"));
+        // 获取所有被 @Bean 注解的方法列表
+        Set<MethodMetadata> annotatedMethods =
+                metadataReader.getAnnotationMetadata().getAnnotatedMethods(Bean.class.getName());
+        for (MethodMetadata methodMetadata : annotatedMethods) {
+            System.out.println(methodMetadata);
+
+            BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
+            // 把 Config 类当成工厂类 @Bean注解的方法为工厂方法
+            builder.setFactoryMethodOnBean(methodMetadata.getMethodName(), "config");
+            // sqlSessionFactoryBean 需要自动装配，默认关闭的
+            builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+            // 设置初始化方法 增加后才会打印如下日志
+            // 23:22:43.396 [main] INFO com.alibaba.druid.pool.DruidDataSource - {dataSource-1} inited
+            String initMethod =
+                    methodMetadata.getAnnotationAttributes(Bean.class.getName()).get("initMethod").toString();
+            if (initMethod.length() > 0) {
+                builder.setInitMethodName(initMethod);
+            }
+            AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+            // 方法名作为 Bean 的名字
+            context.getDefaultListableBeanFactory()
+                    .registerBeanDefinition(methodMetadata.getMethodName(), beanDefinition);
+        }
 
         // 初始化容器
         context.refresh();
