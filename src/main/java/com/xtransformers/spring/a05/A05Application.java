@@ -1,21 +1,17 @@
 package com.xtransformers.spring.a05;
 
 import java.io.IOException;
-import java.util.Set;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.stereotype.Component;
@@ -40,6 +36,8 @@ public class A05Application {
 
         // 使用自定义BeanFactory后处理器 模拟 @Bean
         context.registerBean(AtBeanPostProcessor.class);
+        // 使用自定义BeanFactory后处理器 模拟 @Mapper
+        context.registerBean(MapperPostProcessor.class);
 
         // 初始化容器
         context.refresh();
