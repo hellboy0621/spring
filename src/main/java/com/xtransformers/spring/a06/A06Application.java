@@ -2,6 +2,7 @@ package com.xtransformers.spring.a06;
 
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -24,7 +25,7 @@ public class A06Application {
 
         GenericApplicationContext context = new GenericApplicationContext();
 
-        context.registerBean("myBean", MyBean.class);
+        // context.registerBean("myBean", MyBean.class);
 
         /**
          * 2. b、c、d 的功能用 @Autowired 就能实现，为什么还要使用 aware 接口？
@@ -35,7 +36,13 @@ public class A06Application {
         context.registerBean(AutowiredAnnotationBeanPostProcessor.class);
         context.registerBean(CommonAnnotationBeanPostProcessor.class);
 
+        context.registerBean("config1", Config1.class);
+        context.registerBean(ConfigurationClassPostProcessor.class);
+
         context.refresh();
+        // 1. 找到所有的 BeanFactory 后处理器
+        // 2. 添加 Bean 后处理器
+        // 3. 初始化单例
 
         context.close();
     }
