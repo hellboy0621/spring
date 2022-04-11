@@ -36,8 +36,10 @@ public class A06Application {
         context.registerBean(AutowiredAnnotationBeanPostProcessor.class);
         context.registerBean(CommonAnnotationBeanPostProcessor.class);
 
-        context.registerBean("config1", Config1.class);
+        // context.registerBean("config1", Config1.class);
         context.registerBean(ConfigurationClassPostProcessor.class);
+
+        context.registerBean("config2", Config2.class);
 
         context.refresh();
         // 1. 找到所有的 BeanFactory 后处理器
