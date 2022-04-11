@@ -17,8 +17,8 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.mvc.Controller;
+// import org.springframework.web.servlet.DispatcherServlet;
+// import org.springframework.web.servlet.mvc.Controller;
 
 /**
  * 常见 ApplicationContext 实现
@@ -124,24 +124,24 @@ public class ApplicationContextTest {
             return new TomcatServletWebServerFactory();
         }
 
-        @Bean
-        public DispatcherServlet dispatcherservlet() {
-            return new DispatcherServlet();
-        }
-
-        @Bean
-        public DispatcherServletRegistrationBean dispatcherServletRegistrationBean(
-                DispatcherServlet dispatcherServlet) {
-            return new DispatcherServletRegistrationBean(dispatcherServlet, "/");
-        }
-
-        @Bean("/hello")
-        public Controller controller1() {
-            return (request, response) -> {
-                response.getWriter().write("Hello Controller1.");
-                return null;
-            };
-        }
+        // @Bean
+        // public DispatcherServlet dispatcherservlet() {
+        //     return new DispatcherServlet();
+        // }
+        //
+        // @Bean
+        // public DispatcherServletRegistrationBean dispatcherServletRegistrationBean(
+        //         DispatcherServlet dispatcherServlet) {
+        //     return new DispatcherServletRegistrationBean(dispatcherServlet, "/");
+        // }
+        //
+        // @Bean("/hello")
+        // public Controller controller1() {
+        //     return (request, response) -> {
+        //         response.getWriter().write("Hello Controller1.");
+        //         return null;
+        //     };
+        // }
     }
 
     @Configuration
