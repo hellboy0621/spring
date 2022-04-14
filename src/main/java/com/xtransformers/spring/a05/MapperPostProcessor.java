@@ -1,13 +1,10 @@
 package com.xtransformers.spring.a05;
 
 import java.io.IOException;
-import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
@@ -63,21 +60,21 @@ public class MapperPostProcessor implements BeanDefinitionRegistryPostProcessor 
                     // 目标
                     // MapperFactoryBean<Mapper1> mapperFactoryBean = new MapperFactoryBean<>(Mapper1.class);
                     // mapperFactoryBean.setSqlSessionFactory(sqlSessionFactory);
-                    AbstractBeanDefinition beanDefinition =
-                            BeanDefinitionBuilder.genericBeanDefinition(MapperFactoryBean.class)
-                                    // 构造方法需要传入 Mapper class
-                                    .addConstructorArgValue(classMetadata.getClassName())
-                                    // 需要设置 sqlSessionFactory，通过自动注入 因为在 Config 中通过 @Bean 提供了
-                                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
-                                    .getBeanDefinition();
+                    // AbstractBeanDefinition beanDefinition =
+                    //         BeanDefinitionBuilder.genericBeanDefinition(MapperFactoryBean.class)
+                    //                 // 构造方法需要传入 Mapper class
+                    //                 .addConstructorArgValue(classMetadata.getClassName())
+                    //                 // 需要设置 sqlSessionFactory，通过自动注入 因为在 Config 中通过 @Bean 提供了
+                    //                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+                    //                 .getBeanDefinition();
                     // 错误写法，如果通过 beanDefinition 获取 beanName，每次循环得到的都是 mapperFactoryBean
                     // String beanName = beanNameGenerator.generateBeanName(beanDefinition, beanFactory);
                     // LOGGER.info("beanName : {}", beanName);
-                    AbstractBeanDefinition beanDefinitionForBeanName =
-                            BeanDefinitionBuilder.genericBeanDefinition(classMetadata.getClassName())
-                                    .getBeanDefinition();
-                    String beanName = beanNameGenerator.generateBeanName(beanDefinitionForBeanName, beanFactory);
-                    beanFactory.registerBeanDefinition(beanName, beanDefinition);
+                    // AbstractBeanDefinition beanDefinitionForBeanName =
+                    //         BeanDefinitionBuilder.genericBeanDefinition(classMetadata.getClassName())
+                    //                 .getBeanDefinition();
+                    // String beanName = beanNameGenerator.generateBeanName(beanDefinitionForBeanName, beanFactory);
+                    // beanFactory.registerBeanDefinition(beanName, beanDefinition);
                 }
             }
         } catch (IOException e) {

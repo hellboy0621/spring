@@ -1,7 +1,6 @@
 package com.xtransformers.spring.a05;
 
 import java.io.IOException;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -101,7 +100,7 @@ public class A05Application {
         // 解析 @ComponentScan @Bean @Import @ImportResource
         context.registerBean(ConfigurationClassPostProcessor.class);
         // 解析 @MapperScan
-        context.registerBean(MapperScannerConfigurer.class, beanDefinition ->
-                beanDefinition.getPropertyValues().add("basePackage", "com.xtransformers.spring.a05.mapper"));
+        // context.registerBean(MapperScannerConfigurer.class, beanDefinition ->
+        //         beanDefinition.getPropertyValues().add("basePackage", "com.xtransformers.spring.a05.mapper"));
     }
 }
