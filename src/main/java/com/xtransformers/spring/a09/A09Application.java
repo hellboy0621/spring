@@ -41,7 +41,12 @@ public class A09Application {
          * 代理对象虽然还是同一个，但当每次使用代理对象的任意方法时，由代理创建新的 BeanForPrototype 对象
          *
          * 2. 在对象上，增加注解属性
-         *
+         * @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+         * 3. 使用 ObjectFactory
+         * 4. 使用 ApplicationContext
+         * 
+         * 理念：推迟其他 scope bean 的获取
+         * 无论是通过代理，还是通过容器
          *
          * 00:13:03.255 [main] INFO com.xtransformers.spring.a09.A09Application - element.beanForPrototype com.xtransformers.spring.a09.BeanForPrototype@37858383
          * 00:13:03.269 [main] INFO com.xtransformers.spring.a09.A09Application - element.beanForPrototype com.xtransformers.spring.a09.BeanForPrototype@5136d012
@@ -54,6 +59,18 @@ public class A09Application {
         LOGGER.info("element.beanForPrototype2 {}", element.getBeanForPrototype2());
 
         LOGGER.info("beanForPrototype2 {}", element.getBeanForPrototype2().getClass());
+
+        LOGGER.info("element.beanForPrototype3 {}", element.getBeanForPrototype3());
+        LOGGER.info("element.beanForPrototype3 {}", element.getBeanForPrototype3());
+        LOGGER.info("element.beanForPrototype3 {}", element.getBeanForPrototype3());
+
+        LOGGER.info("beanForPrototype3 {}", element.getBeanForPrototype3().getClass());
+
+        LOGGER.info("element.beanForPrototype4 {}", element.getBeanForPrototype4());
+        LOGGER.info("element.beanForPrototype4 {}", element.getBeanForPrototype4());
+        LOGGER.info("element.beanForPrototype4 {}", element.getBeanForPrototype4());
+
+        LOGGER.info("beanForPrototype4 {}", element.getBeanForPrototype4().getClass());
 
         context.close();
 
