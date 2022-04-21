@@ -17,5 +17,4 @@ public class Target {
         System.out.println("Target.save(long)");
     }
 
-
 }
