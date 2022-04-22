@@ -3,6 +3,7 @@ package com.xtransformers.spring.a15;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
@@ -66,6 +67,41 @@ public class A15 {
          * Target1.bar
          * proxy.getClass() = class com.xtransformers.spring.a15.A15$Target1$$EnhancerBySpringCGLIB$$326fcd70
          */
+
+        /**
+         * Spring 代理选择
+         * @see ProxyFactory 的父类
+         * @see ProxyConfig#isProxyTargetClass() 属性 proxyTargetClass
+         * 3种情况
+         * proxyTargetClass == false，目标实现了接口，使用 JDK 实现
+         * proxyTargetClass == false，目标没有实现接口，使用 CGLIB 实现
+         * proxyTargetClass == true，使用 CGLIB 实现
+         */
+        factory.setInterfaces(target1.getClass().getInterfaces());
+        proxy = (I1) factory.getProxy();
+        proxy.foo();
+        proxy.bar();
+        System.out.println("proxy.getClass() = " + proxy.getClass());
+
+        Target2 target2 = new Target2();
+        factory.setTarget(target2);
+        factory.setInterfaces(target2.getClass().getInterfaces());
+        Target2 proxy2 = (Target2) factory.getProxy();
+        proxy2.foo();
+        proxy2.bar();
+        System.out.println("proxy2.getClass() = " + proxy2.getClass());
+        /**
+         * before...
+         * Target1.foo
+         * after...
+         * Target1.bar
+         * proxy.getClass() = class com.xtransformers.spring.a15.$Proxy0
+         * before...
+         * Target2.foo
+         * after...
+         * Target2.bar
+         * proxy2.getClass() = class com.xtransformers.spring.a15.A15$Target2$$EnhancerBySpringCGLIB$$a987eadb
+         */
     }
 
     static interface I1 {
@@ -87,14 +123,12 @@ public class A15 {
         }
     }
 
-    static class Target2 implements I1 {
+    static class Target2 {
 
-        @Override
         public void foo() {
             System.out.println("Target2.foo");
         }
 
-        @Override
         public void bar() {
             System.out.println("Target2.bar");
         }
