@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author daniel
@@ -76,11 +77,23 @@ public class A17Application {
 
         ((Target1) o1).foo();
         /**
+         * 默认顺序，低级切面优先于高级切面先执行
+         *
          * advisor3.before
          * Aspect1.before
          * Target1.foo
          * Aspect1.after
          * advisor3.after
+         */
+
+        /**
+         * 增加 顺序 控制后，高级切面 Order = 2，低级切面 = 3，数字越小优先级越高
+         *
+         * Aspect1.before
+         * advisor3.before
+         * Target1.foo
+         * advisor3.after
+         * Aspect1.after
          */
 
         context.close();
@@ -100,11 +113,19 @@ public class A17Application {
 
     // 高级的切面
     @Aspect
+    @Order(2) // 加在类上生效，可以决定类与类之间的执行顺序
     static class Aspect1 {
 
         @Before("execution(* foo())")
+        @Order(2) // 加在方法上不生效
         public void before() {
             System.out.println("Aspect1.before");
+        }
+
+        @Before("execution(* foo())")
+        @Order(1) // 加在方法上不生效
+        public void before2() {
+            System.out.println("Aspect1.before2");
         }
 
         @After("execution(* foo())")
@@ -123,10 +144,15 @@ public class A17Application {
          * @return
          */
         @Bean
+        @Order(1) // 加在低级切面类上不生效
         public Advisor advisor3(MethodInterceptor advice3) {
             AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
             pointcut.setExpression("execution(* foo())");
-            return new DefaultPointcutAdvisor(pointcut, advice3);
+            // DefaultPointcutAdvisor 实现了 Ordered 接口
+            DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice3);
+            // 实现了 Ordered 接口设置生效
+            // advisor.setOrder(3);
+            return advisor;
         }
 
         /**
