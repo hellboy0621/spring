@@ -152,6 +152,19 @@ public class A18Application {
          * AspectJAroundAdvice（没有转换）
          * AspectJAfterReturningAdvice -> AfterReturningAdviceInterceptor
          */
+
+        /**
+         * 适配器模式
+         * @see org.springframework.aop.framework.adapter.MethodBeforeAdviceAdapter
+         * MethodBeforeAdviceAdapter    将   @Before AspectJMethodBeforeAdvice              适配为 MethodBeforeAdviceInterceptor
+         * @see org.springframework.aop.framework.adapter.AfterReturningAdviceAdapter
+         * AfterReturningAdviceAdapter  将   @AfterReturning AspectJAfterReturningAdvice    适配为 AfterReturningAdviceInterceptor
+         *
+         */
+
+        // 创建并执行调用链
+        // MethodInvocation methodInvocation =
+        //         new ReflectiveMethodInvocation()
     }
 
     static class Target {
