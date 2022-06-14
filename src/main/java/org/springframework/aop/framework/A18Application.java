@@ -3,6 +3,7 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -16,6 +17,7 @@ import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
@@ -52,12 +54,12 @@ public class A18Application {
         }
 
         @Around("execution(* foo())")
-        public void arount(ProceedingJoinPoint pjp) throws Throwable {
-            System.out.println("Aspect.arount");
+        public void around(ProceedingJoinPoint pjp) throws Throwable {
+            System.out.println("Aspect.around");
         }
     }
 
-    public static void main(String[] args) throws NoSuchMethodException {
+    public static void main(String[] args) throws Throwable {
         // 高级切面 Aspect 转换为低级切面 Advisor
         List<Advisor> advisorList = new ArrayList<>();
         AspectInstanceFactory factory = new SingletonAspectInstanceFactory(new Aspect());
@@ -116,9 +118,11 @@ public class A18Application {
          * 无论 ProxyFactory 基于哪种方式创建代理，最后干活（调用 advice）的是一个 MethodInterceptor 对象
          * a. 因为 advisor 有多个，且一个套一个调用，因此需要一个调用链对象，即 MethodInvocation
          * b. MethodInvocation 要知道 advice 有哪些，还要知道目标，调用次序如下
-         *      | -> before1 -----------------------------------|
+         *
+         *      将 MethodInvocation 放入当前线程
+         *      | -> before1 -----------------------------------| 从当前线程获取 MethodInvocation
          *      |                                               |
-         *      |   | -> before2 -------------------|           |
+         *      |   | -> before2 -------------------|           | 从当前线程获取 MethodInvocation
          *      |   |                               |           |
          *      |   |   | -> target --- 目标 --- advice2 --- advice1
          *      |   |                               |           |
@@ -130,12 +134,18 @@ public class A18Application {
          *      - 对外是为了方便使用，要区分 before、afterReturning
          *      - 对内统一都是环绕通知，统一用 MethodInterceptor 表示
          *
-         *
          */
 
         // 通知统一转换为环绕通知
         ProxyFactory proxyFactory = new ProxyFactory();
-        proxyFactory.setTarget(new Target());
+        Target target = new Target();
+        proxyFactory.setTarget(target);
+        // 把 MethodInvocation 放入当前线程
+        // Exception in thread "main" java.lang.IllegalStateException:
+        // No MethodInvocation found: Check that an AOP invocation is in progress and that the ExposeInvocationInterceptor is upfront in the interceptor chain.
+        // Specifically, note that advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!
+        // In addition, ExposeInvocationInterceptor and ExposeInvocationInterceptor.currentInvocation() must be invoked from the same thread.
+        proxyFactory.addAdvice(ExposeInvocationInterceptor.INSTANCE);
         proxyFactory.addAdvisors(advisorList);
 
         System.out.println(">>>>>>>>>>>>>>>");
@@ -162,9 +172,13 @@ public class A18Application {
          *
          */
 
-        // 创建并执行调用链
-        // MethodInvocation methodInvocation =
-        //         new ReflectiveMethodInvocation()
+        System.out.println(">>>>>>>>>>>>>>>");
+
+        // 创建并执行调用链（环绕通知 + 目标）
+        MethodInvocation methodInvocation = new ReflectiveMethodInvocation(
+                null, target, Target.class.getMethod("foo"), new Object[0], Target.class, methodInterceptorList
+        );
+        methodInvocation.proceed();
     }
 
     static class Target {
