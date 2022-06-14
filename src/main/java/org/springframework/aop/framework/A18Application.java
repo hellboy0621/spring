@@ -55,7 +55,9 @@ public class A18Application {
 
         @Around("execution(* foo())")
         public void around(ProceedingJoinPoint pjp) throws Throwable {
-            System.out.println("Aspect.around");
+            System.out.println("Aspect.around 1");
+            pjp.proceed();
+            System.out.println("Aspect.around 2");
         }
     }
 
