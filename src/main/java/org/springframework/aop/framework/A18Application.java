@@ -181,6 +181,13 @@ public class A18Application {
                 null, target, Target.class.getMethod("foo"), new Object[0], Target.class, methodInterceptorList
         );
         methodInvocation.proceed();
+
+        /**
+         * 此步模拟调用链过程，是一个简单的递归过程
+         * 1. proceed() 方法调用链中下一个环绕通知
+         * 2. 每个环绕通知内部继续调用 proceed()
+         * 3. 调用到没有更多通知了，就调用目标方法
+         */
     }
 
     static class Target {
