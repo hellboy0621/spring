@@ -7,6 +7,8 @@ import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebSe
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -44,6 +46,7 @@ public class A20 {
             return;
         }
 
+        // 调用控制器方法
         CustomRequestMappingHandlerAdapter handlerAdapter = context.getBean(CustomRequestMappingHandlerAdapter.class);
         MockHttpServletResponse response = new MockHttpServletResponse();
         handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
@@ -60,6 +63,15 @@ public class A20 {
         handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
         // [DEBUG] 10:41:09.355 [main] c.x.spring.a20.Controller1          - test2(Adix)
 
+        System.out.println("所有参数解析器");
+        for (HandlerMethodArgumentResolver each : handlerAdapter.getArgumentResolvers()) {
+            System.out.println(each);
+        }
+
+        System.out.println("所有返回值解析器");
+        for (HandlerMethodReturnValueHandler each : handlerAdapter.getReturnValueHandlers()) {
+            System.out.println(each);
+        }
     }
 
 
