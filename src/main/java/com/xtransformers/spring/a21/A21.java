@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -85,7 +86,8 @@ public class A21 {
         HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
         composite.addResolvers(
                 requestParamResolver,
-                new PathVariableMethodArgumentResolver()
+                new PathVariableMethodArgumentResolver(),
+                new RequestHeaderMethodArgumentResolver(beanFactory)
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
