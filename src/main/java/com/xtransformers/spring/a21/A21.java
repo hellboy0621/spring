@@ -24,6 +24,7 @@ import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
@@ -79,6 +80,12 @@ public class A21 {
         RequestParamMethodArgumentResolver requestParamResolver =
                 new RequestParamMethodArgumentResolver(beanFactory, true);
 
+        // 组合
+        HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+        composite.addResolvers(
+            requestParamResolver
+        );
+
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
             // 参数名称解析器，不增加无法解析参数名，methodParameter.getParameterName() 为 null
             methodParameter.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
@@ -89,11 +96,11 @@ public class A21 {
                             Collectors.joining());
             annotationStr = annotationStr.length() == 0 ? "" : " @" + annotationStr;
 
-            if (requestParamResolver.supportsParameter(methodParameter)) {
+            if (composite.supportsParameter(methodParameter)) {
                 // 支持，解析
-                Object value = requestParamResolver.resolveArgument(methodParameter, mavContainer,
+                Object value = composite.resolveArgument(methodParameter, mavContainer,
                         new ServletWebRequest(request), binderFactory);
-                System.out.println("value -> " + value.getClass());
+                // System.out.println("value -> " + value.getClass());
                 final String formatter = "[%s]%s %s %s -> %s\n";
                 System.out.printf(formatter, methodParameter.getParameterIndex(), annotationStr,
                         methodParameter.getParameterType().getSimpleName(), methodParameter.getParameterName(), value);
