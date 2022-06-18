@@ -1,14 +1,28 @@
 package com.xtransformers.spring.a21;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockPart;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.HandlerMapping;
 
 public class A21 {
 
@@ -35,7 +49,54 @@ public class A21 {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchMethodException {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        HttpServletRequest multiRequest = mockRequest();
 
+        // 1. 控制器方法被封装为 HandlerMethod （脱离HandlerMapping）
+        HandlerMethod handlerMethod = new HandlerMethod(new Controller(),
+                Controller.class.getMethod("test", String.class, String.class, int.class, String.class,
+                        MultipartFile.class, int.class, String.class, String.class, String.class,
+                        HttpServletRequest.class, User.class, User.class, User.class));
+
+        // 2. 准备对象绑定与类型转换
+
+        // 3. 准备 ModelAndViewContainer 用来存储中间 Model 结果
+        ModelAndViewContainer modelAndViewContainer = new ModelAndViewContainer();
+
+        // 4. 解析每个参数值
+        for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
+            // 参数名称解析器，不增加无法解析参数名，methodParameter.getParameterName() 为 null
+            methodParameter.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
+
+            // [0] @RequestParam String name1
+            String formatter = "[%s]%s %s %s\n";
+
+            String annotationStr = Arrays.stream(methodParameter.getParameterAnnotations())
+                    .map(each -> each.annotationType().getSimpleName()).collect(
+                            Collectors.joining());
+            annotationStr = annotationStr.length() == 0 ? "" : " @" + annotationStr;
+            System.out.printf(formatter, methodParameter.getParameterIndex(), annotationStr,
+                    methodParameter.getParameterType().getSimpleName(), methodParameter.getParameterName());
+        }
+
+    }
+
+    private static HttpServletRequest mockRequest() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameter("name1", "张三");
+        request.setParameter("name2", "李四");
+        request.addPart(new MockPart("file", "abc", "hello".getBytes(StandardCharsets.UTF_8)));
+        Map<String, String> uriTemplateVariables = new AntPathMatcher()
+                .extractUriTemplateVariables("/test/{id}", "/test/123");
+        request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+        request.setContentType("application/json");
+        request.setCookies(new Cookie("token", "123456"));
+        request.setParameter("name", "王五");
+        request.setParameter("age", "18");
+        request.setContent("""
+                                
+                """.getBytes(StandardCharsets.UTF_8));
+        return request;
     }
 }
