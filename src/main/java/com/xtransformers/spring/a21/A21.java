@@ -29,6 +29,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodArgumentResolver;
 
 public class A21 {
 
@@ -78,12 +79,13 @@ public class A21 {
         // true 表示可以不加 @RequestParam 注解
         // false 表示必须加 @RequestParam 注解
         RequestParamMethodArgumentResolver requestParamResolver =
-                new RequestParamMethodArgumentResolver(beanFactory, true);
+                new RequestParamMethodArgumentResolver(beanFactory, false);
 
         // 组合
         HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
         composite.addResolvers(
-            requestParamResolver
+                requestParamResolver,
+                new PathVariableMethodArgumentResolver()
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
@@ -119,8 +121,11 @@ public class A21 {
         request.setParameter("name1", "张三");
         request.setParameter("name2", "李四");
         request.addPart(new MockPart("file", "abc", "hello".getBytes(StandardCharsets.UTF_8)));
-        Map<String, String> uriTemplateVariables = new AntPathMatcher()
-                .extractUriTemplateVariables("/test/{id}", "/test/123");
+        Map<String, String> uriTemplateVariables =
+                new AntPathMatcher().extractUriTemplateVariables("/test/{id}", "/test/123");
+        // System.out.println("uriTemplateVariables = " + uriTemplateVariables);
+        // 本应该是 HandlerMapping 做的映射工作，因为没有引入，所以通过工具类把对应关系给到 request
+        // uriTemplateVariables = {id=123}
         request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
         request.setContentType("application/json");
         request.setCookies(new Cookie("token", "123456"));
