@@ -77,6 +77,10 @@ public class A20 {
         }
 
         System.out.println("所有返回值解析器");
+        ArrayList<HandlerMethodReturnValueHandler> newReturnValueHandlers =
+                new ArrayList<>(handlerAdapter.getReturnValueHandlers());
+        newReturnValueHandlers.add(0, new YmlReturnValueHandler());
+        handlerAdapter.setReturnValueHandlers(newReturnValueHandlers);
         for (HandlerMethodReturnValueHandler each : handlerAdapter.getReturnValueHandlers()) {
             System.out.println(each);
         }
@@ -91,6 +95,18 @@ public class A20 {
         }
         handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
 
+        request = new MockHttpServletRequest("GET", "/test4");
+        chain = handlerMapping.getHandler(request);
+        System.out.println("chain = " + chain);
+        // chain = HandlerExecutionChain with [com.xtransformers.spring.a20.Controller1#test4()] and 0 interceptors
+        if (chain == null) {
+            return;
+        }
+        handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
+        // 查看响应结果
+        String test4Result = response.getContentAsString();
+        System.out.println("test4Result = " + test4Result);
+        // test4Result = !!com.xtransformers.spring.a20.Controller1$User {age: 18, name: 张三}
     }
 
 
