@@ -1,5 +1,7 @@
 package com.xtransformers.spring.a20;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +58,8 @@ public class A20 {
         request.setParameter("name", "Adix");
         chain = handlerMapping.getHandler(request);
         System.out.println("chain = " + chain);
-        // chain = HandlerExecutionChain with [com.xtransformers.spring.a20.Controller1#test2(String)] and 0 interceptors
+        // chain = HandlerExecutionChain with [com.xtransformers.spring.a20.Controller1#test2(String)] and 0
+        // interceptors
         if (chain == null) {
             return;
         }
@@ -64,6 +67,11 @@ public class A20 {
         // [DEBUG] 10:41:09.355 [main] c.x.spring.a20.Controller1          - test2(Adix)
 
         System.out.println("所有参数解析器");
+        // 把自定义的 TokenArgumentResolver 放在责任链的最前面
+        List<HandlerMethodArgumentResolver> newArgumentResolvers =
+                new ArrayList<>(handlerAdapter.getArgumentResolvers());
+        newArgumentResolvers.add(0, new TokenArgumentResolver());
+        handlerAdapter.setArgumentResolvers(newArgumentResolvers);
         for (HandlerMethodArgumentResolver each : handlerAdapter.getArgumentResolvers()) {
             System.out.println(each);
         }
@@ -72,6 +80,17 @@ public class A20 {
         for (HandlerMethodReturnValueHandler each : handlerAdapter.getReturnValueHandlers()) {
             System.out.println(each);
         }
+
+        request = new MockHttpServletRequest("PUT", "/test3");
+        request.addHeader("token", "TOKEN_123");
+        chain = handlerMapping.getHandler(request);
+        System.out.println("chain = " + chain);
+
+        if (chain == null) {
+            return;
+        }
+        handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
+
     }
 
 

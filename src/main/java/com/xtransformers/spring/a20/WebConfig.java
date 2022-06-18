@@ -59,7 +59,11 @@ public class WebConfig {
     // 2. 加入 RequestMappingHandlerAdapter，会替换掉 DispatcherServlet 默认的 4 个 HandlerAdapter
     @Bean
     public CustomRequestMappingHandlerAdapter customRequestMappingHandlerAdapter() {
-        return new CustomRequestMappingHandlerAdapter();
+        // 2行代码解开注释会导致默认参数解析器不能正常加载，导致调用 /test2 报错
+        // TokenArgumentResolver tokenArgumentResolver = new TokenArgumentResolver();
+        CustomRequestMappingHandlerAdapter handlerAdapter = new CustomRequestMappingHandlerAdapter();
+        // handlerAdapter.setArgumentResolvers(List.of(tokenArgumentResolver));
+        return handlerAdapter;
     }
 
 }

@@ -28,7 +28,7 @@ public class Controller1 {
     }
 
     @PutMapping("/test3")
-    public ModelAndView test3(String token) {
+    public ModelAndView test3(@Token String token) {
         log.debug("test3({})", token);
         return null;
     }
