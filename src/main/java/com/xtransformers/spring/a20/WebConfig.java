@@ -56,4 +56,10 @@ public class WebConfig {
         return new RequestMappingHandlerMapping();
     }
 
+    // 2. 加入 RequestMappingHandlerAdapter，会替换掉 DispatcherServlet 默认的 4 个 HandlerAdapter
+    @Bean
+    public CustomRequestMappingHandlerAdapter customRequestMappingHandlerAdapter() {
+        return new CustomRequestMappingHandlerAdapter();
+    }
+
 }

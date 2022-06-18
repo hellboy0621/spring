@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -35,9 +36,29 @@ public class A20 {
          */
 
         // 模拟请求 返回处理器执行链
-        HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/test1"));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test1");
+        HandlerExecutionChain chain = handlerMapping.getHandler(request);
         System.out.println("chain = " + chain);
         // chain = HandlerExecutionChain with [com.xtransformers.spring.a20.Controller1#test1()] and 0 interceptors
+        if (chain == null) {
+            return;
+        }
+
+        CustomRequestMappingHandlerAdapter handlerAdapter = context.getBean(CustomRequestMappingHandlerAdapter.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
+        // [DEBUG] 10:41:09.344 [main] c.x.spring.a20.Controller1          - test1()
+
+        request = new MockHttpServletRequest("POST", "/test2");
+        request.setParameter("name", "Adix");
+        chain = handlerMapping.getHandler(request);
+        System.out.println("chain = " + chain);
+        // chain = HandlerExecutionChain with [com.xtransformers.spring.a20.Controller1#test2(String)] and 0 interceptors
+        if (chain == null) {
+            return;
+        }
+        handlerAdapter.invokeHandlerMethod(request, response, (HandlerMethod) chain.getHandler());
+        // [DEBUG] 10:41:09.355 [main] c.x.spring.a20.Controller1          - test2(Adix)
 
     }
 
