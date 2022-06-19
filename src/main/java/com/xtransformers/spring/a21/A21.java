@@ -53,8 +53,10 @@ public class A21 {
                 @CookieValue("token") String token,
                 @Value("${GOPATH}") String home2,
                 HttpServletRequest request,
-                @ModelAttribute User user1,
+                @ModelAttribute("user1") User user1,
+                // 模型数据 mavContainer.getModel() = {user1=User{name='王五', age=18}, org.springframework.validation.BindingResult.user1=org.springframework.validation.BeanPropertyBindingResult: 0 errors}
                 User user2,
+                // 模型数据 mavContainer.getModel() = {user1=User{name='王五', age=18}, org.springframework.validation.BindingResult.user1=org.springframework.validation.BeanPropertyBindingResult: 0 errors, user=User{name='王五', age=18}, org.springframework.validation.BindingResult.user=org.springframework.validation.BeanPropertyBindingResult: 0 errors}
                 @RequestBody User user3
         ) {
         }
@@ -149,6 +151,7 @@ public class A21 {
                 final String formatter = "[%s]%s %s %s -> %s\n";
                 System.out.printf(formatter, methodParameter.getParameterIndex(), annotationStr,
                         methodParameter.getParameterType().getSimpleName(), methodParameter.getParameterName(), value);
+                System.out.println("模型数据 mavContainer.getModel() = " + mavContainer.getModel());
             } else {
                 // 不支持
                 final String formatter = "[%s]%s %s %s\n";
