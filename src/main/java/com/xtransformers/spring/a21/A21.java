@@ -33,6 +33,7 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletCookieValueMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ServletRequestMethodArgumentResolver;
 
 public class A21 {
 
@@ -91,7 +92,8 @@ public class A21 {
                 new PathVariableMethodArgumentResolver(),
                 new RequestHeaderMethodArgumentResolver(beanFactory),
                 new ServletCookieValueMethodArgumentResolver(beanFactory),
-                new ExpressionValueMethodArgumentResolver(beanFactory)
+                new ExpressionValueMethodArgumentResolver(beanFactory),
+                new ServletRequestMethodArgumentResolver()
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
