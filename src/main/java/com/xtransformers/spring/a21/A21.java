@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ExpressionValueMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
@@ -45,7 +46,7 @@ public class A21 {
                 @PathVariable("id") int id,
                 @RequestHeader("Content-Type") String header,
                 @CookieValue("token") String token,
-                @Value("${JAVA_HOME}") String home2,
+                @Value("${GOPATH}") String home2,
                 HttpServletRequest request,
                 @ModelAttribute User user1,
                 User user2,
@@ -89,7 +90,8 @@ public class A21 {
                 requestParamResolver,
                 new PathVariableMethodArgumentResolver(),
                 new RequestHeaderMethodArgumentResolver(beanFactory),
-                new ServletCookieValueMethodArgumentResolver(beanFactory)
+                new ServletCookieValueMethodArgumentResolver(beanFactory),
+                new ExpressionValueMethodArgumentResolver(beanFactory)
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
