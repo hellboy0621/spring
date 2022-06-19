@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExpressionValueMethodArgumentResolver;
@@ -33,6 +32,8 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletCookieValueMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
+import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory;
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestMethodArgumentResolver;
 
 public class A21 {
@@ -57,7 +58,32 @@ public class A21 {
     }
 
     static class User {
+        private String name;
+        private int age;
 
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "User{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -73,7 +99,7 @@ public class A21 {
 
         // 2. 准备对象绑定与类型转换
         // @RequestParam("age") int age 将 String 类型的数据转换为 Integer
-        DefaultDataBinderFactory binderFactory = new DefaultDataBinderFactory(null);
+        ServletRequestDataBinderFactory binderFactory = new ServletRequestDataBinderFactory(null, null);
 
         // 3. 准备 ModelAndViewContainer 用来存储中间 Model 结果
         ModelAndViewContainer mavContainer = new ModelAndViewContainer();
@@ -93,7 +119,9 @@ public class A21 {
                 new RequestHeaderMethodArgumentResolver(beanFactory),
                 new ServletCookieValueMethodArgumentResolver(beanFactory),
                 new ExpressionValueMethodArgumentResolver(beanFactory),
-                new ServletRequestMethodArgumentResolver()
+                new ServletRequestMethodArgumentResolver(),
+                // false 表示必须有 @ModelAttribute 注解
+                new ServletModelAttributeMethodProcessor(false)
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
