@@ -2,6 +2,7 @@ package com.xtransformers.spring.a21;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPart;
 import org.springframework.util.AntPathMatcher;
@@ -31,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.ServletCookieValueMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory;
@@ -121,7 +124,11 @@ public class A21 {
                 new ExpressionValueMethodArgumentResolver(beanFactory),
                 new ServletRequestMethodArgumentResolver(),
                 // false 表示必须有 @ModelAttribute 注解
-                new ServletModelAttributeMethodProcessor(false)
+                new ServletModelAttributeMethodProcessor(false),
+                // RequestResponseBodyMethodProcessor 与 ServletModelAttributeMethodProcessor(true) 顺序很重要，不能错，否则解析数据错误
+                new RequestResponseBodyMethodProcessor(List.of(new MappingJackson2HttpMessageConverter())),
+                // true 表示可以没有 @ModelAttribute 注解 前面如果没有正确解析 json 的处理器，就会错误赋值
+                new ServletModelAttributeMethodProcessor(true)
         );
 
         for (MethodParameter methodParameter : handlerMethod.getMethodParameters()) {
@@ -168,10 +175,10 @@ public class A21 {
         request.setParameter("name", "王五");
         request.setParameter("age", "18");
         request.setContent("""
-                                {
-                                    "name": "赵六",
-                                    "age: 20
-                                }
+                     {
+                         "name": "赵六",
+                         "age": 20
+                     }
                 """.getBytes(StandardCharsets.UTF_8));
         return new StandardServletMultipartResolver().resolveMultipart(request);
     }
