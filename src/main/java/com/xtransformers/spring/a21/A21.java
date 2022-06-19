@@ -160,6 +160,14 @@ public class A21 {
             }
         }
 
+        /**
+         * a. 每个参数处理器的功能
+         *  1. 查看是否支持某种参数 supportsParameter
+         *  2. 获取参数值 resolveArgument
+         * b. 组合模式
+         * c. @RequestParam @CookieValue 等注解中的参数名、默认值，都可以从 ${} #{} 中获取
+         */
+
     }
 
     private static HttpServletRequest mockRequest() {
